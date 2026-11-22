@@ -26,7 +26,7 @@ public class ResearchAgentTool {
                         Bulduğun verileri ve bulamadıklarını ayrı ayrı belirt.
                         """)
                 .user(topic)
-                .tools(new CityTools())
+                .tools(new CityTools(),new WeatherTools())
                 .call()
                 .content();
 
@@ -37,7 +37,7 @@ public class ResearchAgentTool {
     }
 
         catch (Exception e){
-            System.out.println("Alt agent hatası: " e.getMessage());
+            System.out.println("Alt agent hatası: " + e.getMessage());
             return "HATA: Araştırma ajanı çalışırken sorun oluştu (" + e.getClass().getSimpleName() + ").";
         }
     }

@@ -1,26 +1,28 @@
 package dev.tunahan.spring_ai;
 
 
-
+import jakarta.validation.Valid;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/youtube")
+@RequestMapping("/api")
 public class ChatController {
 
     private final ChatClient chatClient;
     private final ChatClient researcherClient;
 
+
     public ChatController(ChatClient.Builder builder,
+                          ChatMemory chatMemory,
                           @Qualifier("researcherClient") ChatClient researcherClient) {
 
-        this.chatClient = builder.build();
+        this.chatClient = builder.
+                defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+                .build();
         this.researcherClient = researcherClient;
     }
 
@@ -42,35 +44,36 @@ public class ChatController {
 
 
     @GetMapping("/time")
-    public String time(@RequestParam(defaultValue = "Şuan saat kaç?") String message){
+    public String time(@Valid @RequestBody ChatRequest request){
         return chatClient.prompt()
-                .user(message)
+                .user(request.message())
                 .tools(new DateTimeTools())
                 .call()
                 .content();
     }
 
     @GetMapping("/city")
-    public String city(@RequestParam(defaultValue = "İstanbul'un nüfusu kaç?") String message){
+    public String city(@Valid @RequestBody ChatRequest request){
         return chatClient.prompt()
-                .user(message)
+                .user(request.message())
                 .tools(new CityTools(),new DateTimeTools())
                 .call()
                 .content();
     }
 
     @GetMapping("/agent")
-    public String agent(@RequestParam(defaultValue = "Ankara mı İzmir mi daha kalabalık?")String message){
+    public String agent(@Valid @RequestBody ChatRequest request){
         return chatClient.prompt()
                 .system("""
-                        Sen bir baş asistansın. Şehir verisi gereken HER soruda önce research aracını çağır.
+                        Sen bir baş asistansın. Şehir verisi (nüfus, yüzölçümü, hava durumu) gereken HER soruda önce research aracını çağır.
                         Kendi bilginle sayı söyleme. Araçtan gelen veriyle cevap yaz.
                         Araç cevabında HATA varsa kullanıcıya verinin şu an alınamadığını söyle ve tahmin yapma.
                         Araç cevabında Bu şehir hakkında veri yok varsa hangi bilginin bulunamadığını açıkca söyle,
                         bulunan verilerle cevabın kalanını yaz.
                         Cevabı kısa ve Türkçe ver.
                 """)
-                .user(message)
+                .user(request.message())
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID,request.conversationId()))
                 .tools(new ResearchAgentTool(researcherClient))
                 .call()
                 .content();
