@@ -1,3 +1,5 @@
+![CI](https://github.com/xHyoka/spring-ai-multi-agent/actions/workflows/ci.yml/badge.svg)
+
 # Spring AI Çoklu Ajan Sistemi
 
 Spring AI ile geliştirilmiş, **iki farklı yapay zekâ modelinin birlikte çalıştığı** bir çoklu ajan (multi-agent) örneği. Ana ajan **GPT-4o-mini**, alt ajan **Gemini Flash** ile çalışır. Ana ajan kullanıcıyla konuşur ve ne yapılacağına karar verir, alt ajan ise tool calling ile veri araştırır.
