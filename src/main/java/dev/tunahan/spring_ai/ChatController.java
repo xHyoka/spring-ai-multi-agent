@@ -43,7 +43,7 @@ public class ChatController {
     }
 
 
-    @GetMapping("/time")
+    @PostMapping("/time")
     public String time(@Valid @RequestBody ChatRequest request){
         return chatClient.prompt()
                 .user(request.message())
@@ -52,7 +52,7 @@ public class ChatController {
                 .content();
     }
 
-    @GetMapping("/city")
+    @PostMapping("/city")
     public String city(@Valid @RequestBody ChatRequest request){
         return chatClient.prompt()
                 .user(request.message())
@@ -61,7 +61,7 @@ public class ChatController {
                 .content();
     }
 
-    @GetMapping("/agent")
+    @PostMapping("/agent")
     public String agent(@Valid @RequestBody ChatRequest request){
         return chatClient.prompt()
                 .system("""
